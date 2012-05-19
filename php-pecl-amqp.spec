@@ -4,16 +4,13 @@
 
 Summary:       Communicate with any AMQP compliant server
 Name:          php-pecl-amqp
-Version:       1.0.1
-Release:       3%{?dist}
+Version:       1.0.3
+Release:       1%{?dist}
 # https://bugs.php.net/61337 - missing LICENSE file
 License:       PHP
 Group:         Development/Languages
 URL:           http://pecl.php.net/package/amqp
 Source0:       http://pecl.php.net/get/%{pecl_name}-%{version}.tgz
-
-# http://svn.php.net/viewvc?view=revision&revision=324074
-Patch0:        %{pecl_name}-php54.patch
 
 BuildRoot:     %{_tmppath}/%{name}-%{version}-%{release}-root
 # https://bugs.php.net/61351 - Should requires PHP > 5.2.0
@@ -45,7 +42,15 @@ from any queue.
 %prep
 %setup -q -c
 
-%patch0 -p0 -b php54
+# report as 1.0.2 instead of 1.0.3
+sed -i -e '/"Version"/s/1.0.2/%{version}/' %{pecl_name}-%{version}/amqp.c
+
+# Upstream often forget to change this
+extver=$(sed -n '/"Version"/{s/.*"1/1/;s/".*$//;p}' %{pecl_name}-%{version}/amqp.c)
+if test "x${extver}" != "x%{version}"; then
+   : Error: Upstream version is ${extver}, expecting %{version}.
+   exit 1
+fi
 
 cat > %{pecl_name}.ini << 'EOF'
 ; Enable %{pecl_name} extension module
@@ -131,6 +136,10 @@ fi
 
 
 %changelog
+* Sat May 19 2012 Remi Collet <remi@fedoraproject.org> - 1.0.3-1
+- update to 1.0.3
+- add extension version check (and fix)
+
 * Mon Mar 19 2012 Remi Collet <remi@fedoraproject.org> - 1.0.1-3
 - clean EL-5 stuff as requires php 5.2.0, https://bugs.php.net/61351
 
