@@ -5,7 +5,7 @@
 Summary:       Communicate with any AMQP compliant server
 Name:          php-pecl-amqp
 Version:       1.0.3
-Release:       1%{?dist}
+Release:       2%{?dist}
 # https://bugs.php.net/61337 - missing LICENSE file
 License:       PHP
 Group:         Development/Languages
@@ -136,6 +136,9 @@ fi
 
 
 %changelog
+* Sat Jul 21 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.0.3-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
 * Sat May 19 2012 Remi Collet <remi@fedoraproject.org> - 1.0.3-1
 - update to 1.0.3
 - add extension version check (and fix)
