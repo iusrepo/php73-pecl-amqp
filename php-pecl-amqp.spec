@@ -4,8 +4,8 @@
 
 Summary:       Communicate with any AMQP compliant server
 Name:          php-pecl-amqp
-Version:       1.0.3
-Release:       2%{?dist}
+Version:       1.0.4
+Release:       1%{?dist}
 # https://bugs.php.net/61337 - missing LICENSE file
 License:       PHP
 Group:         Development/Languages
@@ -13,7 +13,6 @@ URL:           http://pecl.php.net/package/amqp
 Source0:       http://pecl.php.net/get/%{pecl_name}-%{version}.tgz
 
 BuildRoot:     %{_tmppath}/%{name}-%{version}-%{release}-root
-# https://bugs.php.net/61351 - Should requires PHP > 5.2.0
 BuildRequires: php-devel > 5.2.0
 BuildRequires: php-pear
 BuildRequires: librabbitmq-devel
@@ -41,9 +40,6 @@ from any queue.
 
 %prep
 %setup -q -c
-
-# report as 1.0.2 instead of 1.0.3
-sed -i -e '/"Version"/s/1.0.2/%{version}/' %{pecl_name}-%{version}/amqp.c
 
 # Upstream often forget to change this
 extver=$(sed -n '/"Version"/{s/.*"1/1/;s/".*$//;p}' %{pecl_name}-%{version}/amqp.c)
@@ -136,6 +132,9 @@ fi
 
 
 %changelog
+* Wed Aug 01 2012 Remi Collet <remi@fedoraproject.org> - 1.0.4-1
+- update to 1.0.4
+
 * Sat Jul 21 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.0.3-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 
