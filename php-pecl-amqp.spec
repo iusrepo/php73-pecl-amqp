@@ -4,9 +4,8 @@
 
 Summary:       Communicate with any AMQP compliant server
 Name:          php-pecl-amqp
-Version:       1.0.4
+Version:       1.0.5
 Release:       1%{?dist}
-# https://bugs.php.net/61337 - missing LICENSE file
 License:       PHP
 Group:         Development/Languages
 URL:           http://pecl.php.net/package/amqp
@@ -40,6 +39,9 @@ from any queue.
 
 %prep
 %setup -q -c
+
+sed -e '/Version/s/1.0.4/%{version}/' \
+    -i %{pecl_name}-%{version}/amqp.c
 
 # Upstream often forget to change this
 extver=$(sed -n '/"Version"/{s/.*"1/1/;s/".*$//;p}' %{pecl_name}-%{version}/amqp.c)
@@ -125,13 +127,17 @@ fi
 
 %files
 %defattr(-,root,root,-)
-%doc %{pecl_name}-%{version}/CREDITS
+%doc %{pecl_name}-%{version}/{CREDITS,LICENSE}
 %config(noreplace) %{_sysconfdir}/php.d/%{pecl_name}.ini
 %{php_extdir}/%{pecl_name}.so
 %{pecl_xmldir}/%{name}.xml
 
 
 %changelog
+* Mon Aug 27 2012 Remi Collet <remi@fedoraproject.org> - 1.0.5-1
+- update to 1.0.5
+- LICENSE now provided in upstream tarball
+
 * Wed Aug 01 2012 Remi Collet <remi@fedoraproject.org> - 1.0.4-1
 - update to 1.0.4
 
