@@ -4,14 +4,13 @@
 
 Summary:       Communicate with any AMQP compliant server
 Name:          php-pecl-amqp
-Version:       1.0.7
+Version:       1.0.9
 Release:       1%{?dist}
 License:       PHP
 Group:         Development/Languages
 URL:           http://pecl.php.net/package/amqp
 Source0:       http://pecl.php.net/get/%{pecl_name}-%{version}.tgz
 
-BuildRoot:     %{_tmppath}/%{name}-%{version}-%{release}-root
 BuildRequires: php-devel > 5.2.0
 BuildRequires: php-pear
 BuildRequires: librabbitmq-devel
@@ -21,6 +20,8 @@ Requires:         php(api) = %{php_core_api}
 Requires(post):   %{__pecl}
 Requires(postun): %{__pecl}
 
+Provides:         php-%{pecl_name} = %{version}
+Provides:         php-%{pecl_name}%{?_isa} = %{version}
 Provides:         php-pecl(%{pecl_name}) = %{version}
 Provides:         php-pecl(%{pecl_name})%{?_isa} = %{version}
 
@@ -88,7 +89,6 @@ make %{?_smp_mflags}
 
 
 %install
-rm -rf %{buildroot}
 make -C %{pecl_name}-%{version} \
      install INSTALL_ROOT=%{buildroot}
 
@@ -107,10 +107,6 @@ php --no-php-ini \
     -m | grep %{pecl_name}
 
 
-%clean
-rm -rf %{buildroot}
-
-
 %post
 %{pecl_install} %{pecl_xmldir}/%{name}.xml >/dev/null || :
 
@@ -122,7 +118,6 @@ fi
 
 
 %files
-%defattr(-,root,root,-)
 %doc %{pecl_name}-%{version}/{CREDITS,LICENSE}
 %config(noreplace) %{_sysconfdir}/php.d/%{pecl_name}.ini
 %{php_extdir}/%{pecl_name}.so
@@ -130,6 +125,10 @@ fi
 
 
 %changelog
+* Tue Nov 13 2012 Remi Collet <remi@fedoraproject.org> - 1.0.9-1
+- update to 1.0.9
+- cleanups
+
 * Wed Sep 12 2012 Remi Collet <remi@fedoraproject.org> - 1.0.7-1
 - update to 1.0.7
 
