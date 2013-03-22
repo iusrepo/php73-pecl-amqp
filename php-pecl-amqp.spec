@@ -5,7 +5,7 @@
 Summary:       Communicate with any AMQP compliant server
 Name:          php-pecl-amqp
 Version:       1.0.9
-Release:       3%{?dist}
+Release:       4%{?dist}
 License:       PHP
 Group:         Development/Languages
 URL:           http://pecl.php.net/package/amqp
@@ -125,6 +125,9 @@ fi
 
 
 %changelog
+* Fri Mar 22 2013 Remi Collet <rcollet@redhat.com> - 1.0.9-4
+- rebuild for http://fedoraproject.org/wiki/Features/Php55
+
 * Wed Mar 13 2013 Remi Collet <remi@fedoraproject.org> - 1.0.9-3
 - rebuild for new librabbitmq
 
