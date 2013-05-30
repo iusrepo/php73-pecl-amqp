@@ -4,8 +4,8 @@
 
 Summary:       Communicate with any AMQP compliant server
 Name:          php-pecl-amqp
-Version:       1.0.9
-Release:       4%{?dist}
+Version:       1.2.0
+Release:       1%{?dist}
 License:       PHP
 Group:         Development/Languages
 URL:           http://pecl.php.net/package/amqp
@@ -40,12 +40,15 @@ from any queue.
 %prep
 %setup -q -c
 
+cd %{pecl_name}-%{version}
+
 # Upstream often forget to change this
-extver=$(sed -n '/"Version"/{s/.*"1/1/;s/".*$//;p}' %{pecl_name}-%{version}/amqp.c)
+extver=$(sed -n '/#define PHP_AMQP_VERSION/{s/.* "//;s/".*$//;p}' php_amqp.h)
 if test "x${extver}" != "x%{version}"; then
    : Error: Upstream version is ${extver}, expecting %{version}.
    exit 1
 fi
+cd ..
 
 cat > %{pecl_name}.ini << 'EOF'
 ; Enable %{pecl_name} extension module
@@ -125,6 +128,9 @@ fi
 
 
 %changelog
+* Thu May 30 2013 Remi Collet <remi@fedoraproject.org> - 1.2.0-1
+- Update to 1.2.0
+
 * Fri Mar 22 2013 Remi Collet <rcollet@redhat.com> - 1.0.9-4
 - rebuild for http://fedoraproject.org/wiki/Features/Php55
 
