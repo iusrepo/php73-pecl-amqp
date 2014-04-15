@@ -1,11 +1,24 @@
-%{!?__pecl:   %{expand: %%global __pecl   %{_bindir}/pecl}}
-%global pecl_name   amqp
+# spec file for php-pecl-amqp
+#
+# Copyright (c) 2012-2014 Remi Collet
+# License: CC-BY-SA
+# http://creativecommons.org/licenses/by-sa/3.0/
+#
+# Please, preserve the changelog entries
+#
+%{!?php_inidir:  %global php_inidir  %{_sysconfdir}/php.d}
+%{!?__pecl:      %global __pecl      %{_bindir}/pecl}
+%{!?__php:       %global __php       %{_bindir}/php}
 
+%global with_zts    0%{?__ztsphp:1}
+%global with_tests  %{?_with_tests:1}%{!?_with_tests:0}
+%global pecl_name   amqp
+%global ini_name    %{pecl_name}.ini
 
 Summary:       Communicate with any AMQP compliant server
 Name:          php-pecl-amqp
-Version:       1.2.0
-Release:       2%{?dist}
+Version:       1.4.0
+Release:       1%{?dist}
 License:       PHP
 Group:         Development/Languages
 URL:           http://pecl.php.net/package/amqp
@@ -13,7 +26,10 @@ Source0:       http://pecl.php.net/get/%{pecl_name}-%{version}.tgz
 
 BuildRequires: php-devel > 5.2.0
 BuildRequires: php-pear
-BuildRequires: librabbitmq-devel
+BuildRequires: librabbitmq-devel >= 0.4.1
+%if %{with_tests}
+BuildRequires: rabbitmq-server
+%endif
 
 Requires:         php(zend-abi) = %{php_zend_api}
 Requires:         php(api) = %{php_core_api}
@@ -25,9 +41,11 @@ Provides:         php-%{pecl_name}%{?_isa} = %{version}
 Provides:         php-pecl(%{pecl_name}) = %{version}
 Provides:         php-pecl(%{pecl_name})%{?_isa} = %{version}
 
+%if 0%{?fedora} < 20 && 0%{?rhel} < 7
 # filter private shared
 %{?filter_provides_in: %filter_provides_in %{_libdir}/.*\.so$}
 %{?filter_setup}
+%endif
 
 
 %description
@@ -39,9 +57,9 @@ from any queue.
 
 %prep
 %setup -q -c
+mv %{pecl_name}-%{version}%{?prever} NTS
 
-cd %{pecl_name}-%{version}
-
+cd NTS
 # Upstream often forget to change this
 extver=$(sed -n '/#define PHP_AMQP_VERSION/{s/.* "//;s/".*$//;p}' php_amqp.h)
 if test "x${extver}" != "x%{version}"; then
@@ -50,7 +68,7 @@ if test "x${extver}" != "x%{version}"; then
 fi
 cd ..
 
-cat > %{pecl_name}.ini << 'EOF'
+cat > %{ini_name} << 'EOF'
 ; Enable %{pecl_name} extension module
 extension = %{pecl_name}.so
 
@@ -81,33 +99,108 @@ extension = %{pecl_name}.so
 
 ; The virtual host on the broker to which to connect.
 ;amqp.vhost = /
+
+; Timeout
+;amqp.timeout=
+;amqp.read_timeout=0
+;amqp.write_timeout=0
+;amqp.connect_timeout=0
 EOF
+
+%if %{with_zts}
+cp -pr NTS ZTS
+%endif
 
 
 %build
-cd %{pecl_name}-%{version}
-phpize
+cd NTS
+%{_bindir}/phpize
 %configure --with-php-config=%{_bindir}/php-config
 make %{?_smp_mflags}
 
+%if %{with_zts}
+cd ../ZTS
+%{_bindir}/zts-phpize
+%configure --with-php-config=%{_bindir}/zts-php-config
+make %{?_smp_mflags}
+%endif
+
 
 %install
-make -C %{pecl_name}-%{version} \
-     install INSTALL_ROOT=%{buildroot}
+make -C NTS install INSTALL_ROOT=%{buildroot}
 
 # Drop in the bit of configuration
-install -Dpm 644 %{pecl_name}.ini %{buildroot}%{_sysconfdir}/php.d/%{pecl_name}.ini
+install -Dpm 644 %{ini_name} %{buildroot}%{php_inidir}/%{ini_name}
 
 # Install XML package description
 install -Dpm 644 package.xml %{buildroot}%{pecl_xmldir}/%{name}.xml
 
+%if %{with_zts}
+make -C ZTS install INSTALL_ROOT=%{buildroot}
+install -Dpm 644 %{ini_name} %{buildroot}%{php_ztsinidir}/%{ini_name}
+%endif
+
+# Test & Documentation
+cd NTS
+for i in $(grep 'role="test"' ../package.xml | sed -e 's/^.*name="//;s/".*$//')
+do install -Dpm 644 $i %{buildroot}%{pecl_testdir}/%{pecl_name}/$i
+done
+for i in $(grep 'role="doc"' ../package.xml | sed -e 's/^.*name="//;s/".*$//')
+do install -Dpm 644 $i %{buildroot}%{pecl_docdir}/%{pecl_name}/$i
+done
+
 
 %check
-# No test provided, just minimal load test
-php --no-php-ini \
-    --define extension_dir=%{pecl_name}-%{version}/modules \
-    --define extension=%{pecl_name}.so \
+: Minimal load test for NTS extension
+%{__php} --no-php-ini \
+    --define extension=NTS/modules/%{pecl_name}.so \
     -m | grep %{pecl_name}
+
+%if %{with_zts}
+: Minimal load test for ZTS extension
+%{__ztsphp} --no-php-ini \
+    --define extension=ZTS/modules/%{pecl_name}.so \
+    -m | grep %{pecl_name}
+%endif
+
+%if %{with_tests}
+mkdir log run base
+: Launch the RabbitMQ service
+export RABBITMQ_PID_FILE=$PWD/run/pid
+export RABBITMQ_LOG_BASE=$PWD/log
+export RABBITMQ_MNESIA_BASE=$PWD/base
+/usr/lib/rabbitmq/bin/rabbitmq-server &>log/output &
+/usr/lib/rabbitmq/bin/rabbitmqctl wait $RABBITMQ_PID_FILE
+
+ret=0
+pushd NTS
+: Run the upstream test Suite for NTS extension
+TEST_PHP_EXECUTABLE=%{__php} \
+TEST_PHP_ARGS="-n -d extension=$PWD/modules/%{pecl_name}.so" \
+NO_INTERACTION=1 \
+REPORT_EXIT_STATUS=1 \
+%{__php} -n run-tests.php || ret=1
+popd
+
+%if %{with_zts}
+pushd ZTS
+: Run the upstream test Suite for ZTS extension
+TEST_PHP_EXECUTABLE=%{__ztsphp} \
+TEST_PHP_ARGS="-n -d extension=$PWD/modules/%{pecl_name}.so" \
+NO_INTERACTION=1 \
+REPORT_EXIT_STATUS=1 \
+%{__ztsphp} -n run-tests.php || ret=1
+popd
+%endif
+
+: Cleanup
+if [ -s $RABBITMQ_PID_FILE ]; then
+   kill $(cat $RABBITMQ_PID_FILE)
+fi
+rm -rf log run base
+
+exit $ret
+%endif
 
 
 %post
@@ -121,13 +214,26 @@ fi
 
 
 %files
-%doc %{pecl_name}-%{version}/{CREDITS,LICENSE}
-%config(noreplace) %{_sysconfdir}/php.d/%{pecl_name}.ini
+%doc %{pecl_docdir}/%{pecl_name}
+%doc %{pecl_testdir}/%{pecl_name}
+%config(noreplace) %{php_inidir}/%{ini_name}
 %{php_extdir}/%{pecl_name}.so
 %{pecl_xmldir}/%{name}.xml
 
+%if %{with_zts}
+%config(noreplace) %{php_ztsinidir}/%{ini_name}
+%{php_ztsextdir}/%{pecl_name}.so
+%endif
+
 
 %changelog
+* Tue Apr 15 2014 Remi Collet <remi@fedoraproject.org> - 1.4.0-1
+- update to 1.6.0 (stable)
+- install doc in pecl doc_dir
+- install tests in pecl test_dir (in devel)
+- add --with tests option to run upstream tests during build
+- build ZTS extension
+
 * Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.2.0-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
 

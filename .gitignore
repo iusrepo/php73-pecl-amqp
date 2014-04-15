@@ -1,4 +1,4 @@
-*spec~
+clog
 package-*.xml
 /amqp-1.0.1.tgz
 /amqp-1.0.3.tgz
@@ -7,3 +7,4 @@ package-*.xml
 /amqp-1.0.7.tgz
 /amqp-1.0.9.tgz
 /amqp-1.2.0.tgz
+/amqp-1.4.0.tgz
