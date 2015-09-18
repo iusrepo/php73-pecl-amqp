@@ -1,4 +1,4 @@
-# spec file for php-pecl-amqp
+# Fedora spec file for php-pecl-amqp
 #
 # Copyright (c) 2012-2015 Remi Collet
 # License: CC-BY-SA
@@ -11,23 +11,28 @@
 %{!?__php:       %global __php       %{_bindir}/php}
 
 %global with_zts    0%{?__ztsphp:1}
-%global with_tests  %{?_with_tests:1}%{!?_with_tests:0}
+%global with_tests  0%{?_with_tests:1}
 %global pecl_name   amqp
 %if "%{php_version}" < "5.6"
 %global ini_name    %{pecl_name}.ini
 %else
 %global ini_name    40-%{pecl_name}.ini
 %endif
-%global prever      beta3
+%global prever      beta4
 
 Summary:       Communicate with any AMQP compliant server
 Name:          php-pecl-amqp
 Version:       1.6.0
-Release:       0.2.%{prever}%{?dist}
+Release:       0.4.%{prever}%{?dist}
 License:       PHP
 Group:         Development/Languages
 URL:           http://pecl.php.net/package/amqp
 Source0:       http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
+
+# https://github.com/pdezwart/php-amqp/pull/178
+Patch0:        %{pecl_name}-178.patch
+# https://github.com/pdezwart/php-amqp/pull/179
+Patch1:        %{pecl_name}-179.patch
 
 BuildRequires: php-devel > 5.2.0
 BuildRequires: php-pear
@@ -68,6 +73,9 @@ sed -e 's/role="test"/role="src"/' -i package.xml
 
 mv %{pecl_name}-%{version}%{?prever} NTS
 cd NTS
+%patch0 -p1 -b .pr178
+%patch1 -p1 -b .pr179
+
 # Upstream often forget to change this
 extver=$(sed -n '/#define PHP_AMQP_VERSION/{s/.* "//;s/".*$//;p}' php_amqp.h)
 if test "x${extver}" != "x%{version}%{?prever}"; then
@@ -79,8 +87,6 @@ cd ..
 cat > %{ini_name} << 'EOF'
 ; Enable %{pecl_name} extension module
 extension = %{pecl_name}.so
-
-; http://www.php.net/manual/en/amqp.configuration.php
 
 ; Whether calls to AMQPQueue::get() and AMQPQueue::consume()
 ; should require that the client explicitly acknowledge messages. 
@@ -109,10 +115,14 @@ extension = %{pecl_name}.so
 ;amqp.vhost = /
 
 ; Timeout
-;amqp.timeout=
-;amqp.read_timeout=0
-;amqp.write_timeout=0
-;amqp.connect_timeout=0
+;amqp.timeout =
+;amqp.read_timeout = 0
+;amqp.write_timeout = 0
+;amqp.connect_timeout = 0
+
+;amqp.channel_max = 256
+;amqp.frame_max = 131072
+;amqp.heartbeat = 0
 EOF
 
 %if %{with_zts}
@@ -232,6 +242,11 @@ fi
 
 
 %changelog
+* Fri Sep 18 2015 Remi Collet <remi@fedoraproject.org> - 1.6.0-0.4.beta4
+- update to 1.6.0beta4
+- open https://github.com/pdezwart/php-amqp/pull/178 - librabbitmq 0.5
+- open https://github.com/pdezwart/php-amqp/pull/179 --with-libdir
+
 * Thu Jun 18 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.6.0-0.2.beta3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
 
