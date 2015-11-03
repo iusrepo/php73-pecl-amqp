@@ -18,21 +18,16 @@
 %else
 %global ini_name    40-%{pecl_name}.ini
 %endif
-%global prever      beta4
+#global prever      beta4
 
 Summary:       Communicate with any AMQP compliant server
 Name:          php-pecl-amqp
 Version:       1.6.0
-Release:       0.4.%{prever}%{?dist}
+Release:       1%{?dist}
 License:       PHP
 Group:         Development/Languages
 URL:           http://pecl.php.net/package/amqp
 Source0:       http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
-
-# https://github.com/pdezwart/php-amqp/pull/178
-Patch0:        %{pecl_name}-178.patch
-# https://github.com/pdezwart/php-amqp/pull/179
-Patch1:        %{pecl_name}-179.patch
 
 BuildRequires: php-devel > 5.2.0
 BuildRequires: php-pear
@@ -73,8 +68,6 @@ sed -e 's/role="test"/role="src"/' -i package.xml
 
 mv %{pecl_name}-%{version}%{?prever} NTS
 cd NTS
-%patch0 -p1 -b .pr178
-%patch1 -p1 -b .pr179
 
 # Upstream often forget to change this
 extver=$(sed -n '/#define PHP_AMQP_VERSION/{s/.* "//;s/".*$//;p}' php_amqp.h)
@@ -89,9 +82,9 @@ cat > %{ini_name} << 'EOF'
 extension = %{pecl_name}.so
 
 ; Whether calls to AMQPQueue::get() and AMQPQueue::consume()
-; should require that the client explicitly acknowledge messages. 
+; should require that the client explicitly acknowledge messages.
 ; Setting this value to 1 will pass in the AMQP_AUTOACK flag to
-: the above method calls if the flags field is omitted. 
+; the above method calls if the flags field is omitted.
 ;amqp.auto_ack = 0
 
 ; The host to which to connect.
@@ -106,7 +99,7 @@ extension = %{pecl_name}.so
 ; The port on which to connect.
 ;amqp.port = 5672
 
-; The number of messages to prefect from the server during a 
+; The number of messages to prefect from the server during a
 ; call to AMQPQueue::get() or AMQPQueue::consume() during which
 ; the AMQP_AUTOACK flag is not set.
 ;amqp.prefetch_count = 3
@@ -242,6 +235,10 @@ fi
 
 
 %changelog
+* Tue Nov  3 2015 Remi Collet <remi@fedoraproject.org> - 1.6.0-1
+- update to 1.6.0 (stable)
+- fix typo in config file
+
 * Fri Sep 18 2015 Remi Collet <remi@fedoraproject.org> - 1.6.0-0.4.beta4
 - update to 1.6.0beta4
 - open https://github.com/pdezwart/php-amqp/pull/178 - librabbitmq 0.5
