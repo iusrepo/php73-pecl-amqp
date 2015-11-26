@@ -22,7 +22,7 @@
 
 Summary:       Communicate with any AMQP compliant server
 Name:          php-pecl-amqp
-Version:       1.6.0
+Version:       1.6.1
 Release:       1%{?dist}
 License:       PHP
 Group:         Development/Languages
@@ -235,6 +235,9 @@ fi
 
 
 %changelog
+* Thu Nov 26 2015 Remi Collet <remi@fedoraproject.org> - 1.6.1-1
+- update to 1.6.1 (stable)
+
 * Tue Nov  3 2015 Remi Collet <remi@fedoraproject.org> - 1.6.0-1
 - update to 1.6.0 (stable)
 - fix typo in config file
