@@ -1,29 +1,21 @@
 # Fedora spec file for php-pecl-amqp
 #
-# Copyright (c) 2012-2015 Remi Collet
+# Copyright (c) 2012-2016 Remi Collet
 # License: CC-BY-SA
 # http://creativecommons.org/licenses/by-sa/4.0/
 #
 # Please, preserve the changelog entries
 #
-%{!?php_inidir:  %global php_inidir  %{_sysconfdir}/php.d}
-%{!?__pecl:      %global __pecl      %{_bindir}/pecl}
-%{!?__php:       %global __php       %{_bindir}/php}
-
 %global with_zts    0%{?__ztsphp:1}
 %global with_tests  0%{?_with_tests:1}
 %global pecl_name   amqp
-%if "%{php_version}" < "5.6"
-%global ini_name    %{pecl_name}.ini
-%else
 %global ini_name    40-%{pecl_name}.ini
-%endif
 #global prever      beta4
 
 Summary:       Communicate with any AMQP compliant server
 Name:          php-pecl-amqp
-Version:       1.6.1
-Release:       3%{?dist}
+Version:       1.7.0
+Release:       1%{?dist}
 License:       PHP
 Group:         Development/Languages
 URL:           http://pecl.php.net/package/amqp
@@ -36,19 +28,13 @@ BuildRequires: librabbitmq-devel >= 0.5.2
 BuildRequires: rabbitmq-server
 %endif
 
-Requires:         php(zend-abi) = %{php_zend_api}
-Requires:         php(api) = %{php_core_api}
+Requires:      php(zend-abi) = %{php_zend_api}
+Requires:      php(api) = %{php_core_api}
 
-Provides:         php-%{pecl_name} = %{version}
-Provides:         php-%{pecl_name}%{?_isa} = %{version}
-Provides:         php-pecl(%{pecl_name}) = %{version}
-Provides:         php-pecl(%{pecl_name})%{?_isa} = %{version}
-
-%if 0%{?fedora} < 20 && 0%{?rhel} < 7
-# filter private shared
-%{?filter_provides_in: %filter_provides_in %{_libdir}/.*\.so$}
-%{?filter_setup}
-%endif
+Provides:      php-%{pecl_name}               = %{version}
+Provides:      php-%{pecl_name}%{?_isa}       = %{version}
+Provides:      php-pecl(%{pecl_name})         = %{version}
+Provides:      php-pecl(%{pecl_name})%{?_isa} = %{version}
 
 
 %description
@@ -62,10 +48,13 @@ from any queue.
 %setup -q -c
 
 # Don't install/register tests
-sed -e 's/role="test"/role="src"/' -i package.xml
+sed -e 's/role="test"/role="src"/' \
+    -e '/LICENSE/s/role="doc"/role="src"/' \
+    -i package.xml
 
 mv %{pecl_name}-%{version}%{?prever} NTS
 cd NTS
+sed -e 's/CFLAGS="-I/CFLAGS="$CFLAGS -I/' -i config.m4
 
 # Upstream often forget to change this
 extver=$(sed -n '/#define PHP_AMQP_VERSION/{s/.* "//;s/".*$//;p}' php_amqp.h)
@@ -210,6 +199,7 @@ exit $ret
 
 
 %files
+%license NTS/LICENSE
 %doc %{pecl_docdir}/%{pecl_name}
 %{pecl_xmldir}/%{name}.xml
 
@@ -223,6 +213,9 @@ exit $ret
 
 
 %changelog
+* Tue Apr 26 2016 Remi Collet <remi@fedoraproject.org> - 1.7.0-1
+- update to 1.7.0 (php 5 and 7, stable)
+
 * Wed Feb 10 2016 Remi Collet <remi@fedoraproject.org> - 1.6.1-2
 - drop scriptlets (replaced file triggers in php-pear)
 
