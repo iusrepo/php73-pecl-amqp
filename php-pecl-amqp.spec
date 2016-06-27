@@ -15,7 +15,7 @@
 Summary:       Communicate with any AMQP compliant server
 Name:          php-pecl-amqp
 Version:       1.7.0
-Release:       1%{?dist}
+Release:       2%{?dist}
 License:       PHP
 Group:         Development/Languages
 URL:           http://pecl.php.net/package/amqp
@@ -213,6 +213,9 @@ exit $ret
 
 
 %changelog
+* Mon Jun 27 2016 Remi Collet <remi@fedoraproject.org> - 1.7.0-2
+- rebuild for https://fedoraproject.org/wiki/Changes/php70
+
 * Tue Apr 26 2016 Remi Collet <remi@fedoraproject.org> - 1.7.0-1
 - update to 1.7.0 (php 5 and 7, stable)
 
