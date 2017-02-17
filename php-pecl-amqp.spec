@@ -14,8 +14,8 @@
 
 Summary:       Communicate with any AMQP compliant server
 Name:          php-pecl-amqp
-Version:       1.7.1
-Release:       3%{?dist}
+Version:       1.8.0
+Release:       1%{?dist}
 License:       PHP
 Group:         Development/Languages
 URL:           http://pecl.php.net/package/amqp
@@ -103,6 +103,11 @@ extension = %{pecl_name}.so
 ;amqp.channel_max = 256
 ;amqp.frame_max = 131072
 ;amqp.heartbeat = 0
+
+;amqp.cacert = ''
+;amqp.cert = ''
+;amqp.key = ''
+;amqp.verify = ''
 EOF
 
 %if %{with_zts}
@@ -213,6 +218,9 @@ exit $ret
 
 
 %changelog
+* Fri Feb 17 2017 Remi Collet <remi@remirepo.net> - 1.8.0-1
+- update to 1.8.0 (stable)
+
 * Sat Feb 11 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1.7.1-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
 
