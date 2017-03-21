@@ -1,6 +1,6 @@
 # Fedora spec file for php-pecl-amqp
 #
-# Copyright (c) 2012-2016 Remi Collet
+# Copyright (c) 2012-2017 Remi Collet
 # License: CC-BY-SA
 # http://creativecommons.org/licenses/by-sa/4.0/
 #
@@ -14,14 +14,14 @@
 
 Summary:       Communicate with any AMQP compliant server
 Name:          php-pecl-amqp
-Version:       1.8.0
+Version:       1.9.0
 Release:       1%{?dist}
 License:       PHP
 Group:         Development/Languages
 URL:           http://pecl.php.net/package/amqp
 Source0:       http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
 
-BuildRequires: php-devel > 5.2.0
+BuildRequires: php-devel > 5.3
 BuildRequires: php-pear
 BuildRequires: pkgconfig(librabbitmq) >= 0.5.2
 %if %{with_tests}
@@ -218,6 +218,9 @@ exit $ret
 
 
 %changelog
+* Tue Mar 21 2017 Remi Collet <remi@remirepo.net> - 1.9.0-1
+- update to 1.9.0 (stable)
+
 * Fri Feb 17 2017 Remi Collet <remi@remirepo.net> - 1.8.0-1
 - update to 1.8.0 (stable)
 
