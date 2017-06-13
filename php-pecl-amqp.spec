@@ -14,7 +14,7 @@
 
 Summary:       Communicate with any AMQP compliant server
 Name:          php-pecl-amqp
-Version:       1.9.0
+Version:       1.9.1
 Release:       1%{?dist}
 License:       PHP
 Group:         Development/Languages
@@ -218,6 +218,9 @@ exit $ret
 
 
 %changelog
+* Mon Jun 12 2017 Remi Collet <remi@remirepo.net> - 1.9.1-1
+- Update to 1.9.1 (stable)
+
 * Tue Mar 21 2017 Remi Collet <remi@remirepo.net> - 1.9.0-1
 - update to 1.9.0 (stable)
 
