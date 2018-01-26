@@ -1,11 +1,15 @@
 # Fedora spec file for php-pecl-amqp
 #
-# Copyright (c) 2012-2017 Remi Collet
+# Copyright (c) 2012-2018 Remi Collet
 # License: CC-BY-SA
 # http://creativecommons.org/licenses/by-sa/4.0/
 #
 # Please, preserve the changelog entries
 #
+
+# we don't want -z defs linker flag
+%undefine _strict_symbol_defs_build
+
 %global with_zts    0%{?__ztsphp:1}
 %global with_tests  0%{?_with_tests:1}
 %global pecl_name   amqp
@@ -15,7 +19,7 @@
 Summary:       Communicate with any AMQP compliant server
 Name:          php-pecl-amqp
 Version:       1.9.3
-Release:       1%{?dist}
+Release:       2%{?dist}
 License:       PHP
 Group:         Development/Languages
 URL:           http://pecl.php.net/package/amqp
@@ -218,6 +222,9 @@ exit $ret
 
 
 %changelog
+* Fri Jan 26 2018 Remi Collet <remi@remirepo.net> - 1.9.3-2
+- undefine _strict_symbol_defs_build
+
 * Thu Oct 19 2017 Remi Collet <remi@remirepo.net> - 1.9.3-1
 - Update to 1.9.3 (stable)
 
