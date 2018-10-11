@@ -19,11 +19,13 @@
 Summary:       Communicate with any AMQP compliant server
 Name:          php-pecl-amqp
 Version:       1.9.3
-Release:       4%{?dist}
+Release:       5%{?dist}
 License:       PHP
 Group:         Development/Languages
 URL:           http://pecl.php.net/package/amqp
 Source0:       http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
+
+Patch0:        https://patch-diff.githubusercontent.com/raw/pdezwart/php-amqp/pull/323.patch
 
 BuildRequires: php-devel > 5.3
 BuildRequires: php-pear
@@ -58,6 +60,8 @@ sed -e 's/role="test"/role="src"/' \
 
 mv %{pecl_name}-%{version}%{?prever} NTS
 cd NTS
+%patch0 -p1 -b .pr323
+
 sed -e 's/CFLAGS="-I/CFLAGS="$CFLAGS -I/' -i config.m4
 
 # Upstream often forget to change this
@@ -222,6 +226,11 @@ exit $ret
 
 
 %changelog
+* Thu Oct 11 2018 Remi Collet <remi@remirepo.net> - 1.9.3-5
+- Rebuild for https://fedoraproject.org/wiki/Changes/php73
+- add patch for PHP 7.3 from
+  https://github.com/pdezwart/php-amqp/pull/323
+
 * Fri Jul 13 2018 Fedora Release Engineering <releng@fedoraproject.org> - 1.9.3-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
 
