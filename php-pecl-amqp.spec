@@ -18,16 +18,14 @@
 
 Summary:       Communicate with any AMQP compliant server
 Name:          php-pecl-amqp
-Version:       1.9.3
-Release:       5%{?dist}
+Version:       1.9.4
+Release:       1%{?dist}
 License:       PHP
 Group:         Development/Languages
 URL:           http://pecl.php.net/package/amqp
 Source0:       http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
 
-Patch0:        https://patch-diff.githubusercontent.com/raw/pdezwart/php-amqp/pull/323.patch
-
-BuildRequires: php-devel > 5.3
+BuildRequires: php-devel > 5.6
 BuildRequires: php-pear
 BuildRequires: pkgconfig(librabbitmq) >= 0.5.2
 %if %{with_tests}
@@ -60,8 +58,6 @@ sed -e 's/role="test"/role="src"/' \
 
 mv %{pecl_name}-%{version}%{?prever} NTS
 cd NTS
-%patch0 -p1 -b .pr323
-
 sed -e 's/CFLAGS="-I/CFLAGS="$CFLAGS -I/' -i config.m4
 
 # Upstream often forget to change this
@@ -116,6 +112,7 @@ extension = %{pecl_name}.so
 ;amqp.cert = ''
 ;amqp.key = ''
 ;amqp.verify = ''
+;amqp.sasl_method = 0
 EOF
 
 %if %{with_zts}
@@ -226,6 +223,12 @@ exit $ret
 
 
 %changelog
+* Wed Jan  2 2019 Remi Collet <remi@remirepo.net> - 1.9.4-1
+- update to 1.9.4
+- drop patch merged upstream
+- raise minimal PHP version to 5.6
+  and open https://github.com/pdezwart/php-amqp/pull/338
+
 * Thu Oct 11 2018 Remi Collet <remi@remirepo.net> - 1.9.3-5
 - Rebuild for https://fedoraproject.org/wiki/Changes/php73
 - add patch for PHP 7.3 from
