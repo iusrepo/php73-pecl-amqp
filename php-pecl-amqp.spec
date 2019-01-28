@@ -21,7 +21,6 @@ Name:          php-pecl-amqp
 Version:       1.9.4
 Release:       1%{?dist}
 License:       PHP
-Group:         Development/Languages
 URL:           http://pecl.php.net/package/amqp
 Source0:       http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
 
