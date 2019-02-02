@@ -19,7 +19,7 @@
 Summary:       Communicate with any AMQP compliant server
 Name:          php-pecl-amqp
 Version:       1.9.4
-Release:       1%{?dist}
+Release:       2%{?dist}
 License:       PHP
 URL:           http://pecl.php.net/package/amqp
 Source0:       http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
@@ -222,6 +222,9 @@ exit $ret
 
 
 %changelog
+* Sat Feb 02 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1.9.4-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
+
 * Wed Jan  2 2019 Remi Collet <remi@remirepo.net> - 1.9.4-1
 - update to 1.9.4
 - drop patch merged upstream
