@@ -1,3 +1,5 @@
+# IUS spec file for php73-pecl-amqp, forked from:
+#
 # Fedora spec file for php-pecl-amqp
 #
 # Copyright (c) 2012-2018 Remi Collet
@@ -14,21 +16,23 @@
 %global with_tests  0%{?_with_tests:1}
 %global pecl_name   amqp
 %global ini_name    40-%{pecl_name}.ini
-#global prever      beta4
+%global php         php73
 
 Summary:       Communicate with any AMQP compliant server
-Name:          php-pecl-amqp
+Name:          %{php}-pecl-amqp
 Version:       1.9.4
-Release:       2%{?dist}
+Release:       3%{?dist}
 License:       PHP
-URL:           http://pecl.php.net/package/amqp
-Source0:       http://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
+URL:           https://pecl.php.net/package/amqp
+Source0:       https://pecl.php.net/get/%{pecl_name}-%{version}%{?prever}.tgz
 
-BuildRequires: php-devel > 5.6
-BuildRequires: php-pear
+BuildRequires: %{php}-devel
+# build require pear1's dependencies to avoid mismatched php stacks
+BuildRequires: pear1 %{php}-cli %{php}-common %{php}-xml
 BuildRequires: pkgconfig(librabbitmq) >= 0.5.2
 %if %{with_tests}
-BuildRequires: rabbitmq-server
+# https://github.com/pdezwart/php-amqp/pull/234
+BuildRequires: rabbitmq-server >= 3.4.0
 %endif
 
 Requires:      php(zend-abi) = %{php_zend_api}
@@ -38,6 +42,11 @@ Provides:      php-%{pecl_name}               = %{version}
 Provides:      php-%{pecl_name}%{?_isa}       = %{version}
 Provides:      php-pecl(%{pecl_name})         = %{version}
 Provides:      php-pecl(%{pecl_name})%{?_isa} = %{version}
+
+# safe replacement
+Provides:      php-pecl-%{pecl_name} = %{version}-%{release}
+Provides:      php-pecl-%{pecl_name}%{?_isa} = %{version}-%{release}
+Conflicts:     php-pecl-%{pecl_name} < %{version}-%{release}
 
 
 %description
@@ -140,7 +149,7 @@ make -C NTS install INSTALL_ROOT=%{buildroot}
 install -Dpm 644 %{ini_name} %{buildroot}%{php_inidir}/%{ini_name}
 
 # Install XML package description
-install -Dpm 644 package.xml %{buildroot}%{pecl_xmldir}/%{name}.xml
+install -Dpm 644 package.xml %{buildroot}%{pecl_xmldir}/%{pecl_name}.xml
 
 %if %{with_zts}
 make -C ZTS install INSTALL_ROOT=%{buildroot}
@@ -207,10 +216,28 @@ exit $ret
 %endif
 
 
+%triggerin -- pear1
+if [ -x %{__pecl} ]; then
+    %{pecl_install} %{pecl_xmldir}/%{pecl_name}.xml >/dev/null || :
+fi
+
+
+%posttrans
+if [ -x %{__pecl} ]; then
+    %{pecl_install} %{pecl_xmldir}/%{pecl_name}.xml >/dev/null || :
+fi
+
+
+%postun
+if [ $1 -eq 0 -a -x %{__pecl} ]; then
+    %{pecl_uninstall} %{pecl_name} >/dev/null || :
+fi
+
+
 %files
 %license NTS/LICENSE
 %doc %{pecl_docdir}/%{pecl_name}
-%{pecl_xmldir}/%{name}.xml
+%{pecl_xmldir}/%{pecl_name}.xml
 
 %config(noreplace) %{php_inidir}/%{ini_name}
 %{php_extdir}/%{pecl_name}.so
@@ -222,6 +249,9 @@ exit $ret
 
 
 %changelog
+* Fri May 24 2019 Carl George <carl@george.computer> - 1.9.4-3
+- Port from Fedora to IUS
+
 * Sat Feb 02 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1.9.4-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
